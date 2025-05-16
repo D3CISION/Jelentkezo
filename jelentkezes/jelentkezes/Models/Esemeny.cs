@@ -9,7 +9,9 @@ namespace jelentkezes.Models
     {
         public int Id { get; set; }
         public string Terem { get; set; }
-        public DateTime Kezd { get; set; }
-        public DateTime Veg { get; set; }
+        public TimeSpan Kezd { get; set; }
+        public TimeSpan Veg { get; set; }
+        public string Tema { get; set; }
+        public string Eloado { get; set; }
     }
 }
