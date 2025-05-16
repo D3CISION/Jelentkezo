@@ -12,17 +12,17 @@ function Bejelentkezes() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = () => {
-    console.log(email)
+    console.log(email);
     if (!email) {
-      toast.error("Az email cím megadása kötelező!")
+      toast.error("Az email cím megadása kötelező!");
       return;
     }
     if (!name) {
-      toast.error("A név megadása kötelező!")
+      toast.error("A név megadása kötelező!");
       return;
     }
     if (!emailRegex.test(email)) {
-      toast.error("Hibás formátumú email cím")
+      toast.error("Hibás formátumú email cím");
       return;
     }
     fetch("https://localhost:44344/api/Szemelyek", {
@@ -40,6 +40,10 @@ function Bejelentkezes() {
           toast.error("Már jelentkeztél előadásokra.");
         }
       } else {
+        localStorage.setItem(
+          "user",
+          JSON.stringify({ name: name, email: email })
+        );
         navigate("/fooldal");
       }
     });
