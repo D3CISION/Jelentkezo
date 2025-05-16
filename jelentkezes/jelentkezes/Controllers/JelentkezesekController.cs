@@ -12,7 +12,7 @@ namespace jelentkezes.Controllers
 {
     public class JelentkezesekController : ApiController
     {
-        public int getJelentkezesekSzama(int id)
+        public static int GetJelentkezesekSzama(int id)
         {
             using (var ctx = new JelentkezesContext())
             {
@@ -66,7 +66,7 @@ namespace jelentkezes.Controllers
                         ctx.SaveChanges();
                         foreach (var item in value.EsemenyIdk)
                         {
-                            if (getJelentkezesekSzama(item)>=15)
+                            if (GetJelentkezesekSzama(item)>=15)
                             {
                                 return Conflict();
                             }
