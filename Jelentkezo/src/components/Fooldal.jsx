@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Table,
   TableBody,
@@ -14,21 +14,60 @@ import {
 } from "@mui/material";
 
 function Fooldal() {
-  // Generate time slots from 8:00 to 11:30 (20-min lectures + 10-min breaks)
+  // State for events fetched from API
+  const [esemenyek, setEsemenyek] = useState([]);
+  const [eloadastipusok, setEloadasTipusok] = useState([]);
+
+  // Fetch events on component mount
+  useEffect(() => {
+    const fetchEsemenyek = async () => {
+      try {
+        const response = await fetch("https://localhost:44344/api/Esemeny");
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        const data = await response.json();
+        setEsemenyek(data);
+        setEloadasTipusok(
+          data.map((item) => {
+            return {
+              terem: item.Terem,
+              tema: item.Tema,
+              eloado: item.Eloado,
+            };
+          })
+        );
+        console.log("Fetched events:", data);
+      } catch (error) {
+        console.error("Error fetching events:", error);
+      }
+    };
+
+    fetchEsemenyek();
+  }, []); // Empty dependency array to run once on mount
+
+  // Generate time slots from 8:00 to 12:00 (15-minute intervals)
   const timeSlots = [];
   let startTime = 8 * 60; // 8:00 in minutes
-  while (startTime <= 11.5 * 60) {
-    // Up to 11:30
+  while (startTime < 12 * 60) {
+    // Up to 11:45
     const startHours = Math.floor(startTime / 60);
     const startMinutes = startTime % 60;
-    const endTime = startTime + 20; // 20-minute lecture
+    const endTime = startTime + 15; // 15-minute interval
     const endHours = Math.floor(endTime / 60);
     const endMinutes = endTime % 60;
     timeSlots.push(
       `${startHours}:${startMinutes.toString().padStart(2, "0")}-` +
         `${endHours}:${endMinutes.toString().padStart(2, "0")}`
     );
-    startTime += 30; // 20-min lecture + 10-min break
+    startTime += 15; // Next 15-minute interval
+  }
+
+  // Generate header labels for every half-hour (8:00, 8:30, ..., 12:00)
+  const timeLabels = [];
+  for (let hour = 8; hour <= 12; hour++) {
+    timeLabels.push(`${hour}:00`);
+    if (hour < 12) timeLabels.push(`${hour}:30`);
   }
 
   // Generate room headers (9A to 12E)
@@ -40,7 +79,7 @@ function Fooldal() {
   }
 
   // State to track bookings (time slot -> room with "X")
-  const [bookings, setBookings] = useState({}); // e.g., { "8:00-8:20": "9A", "8:30-8:50": "10A" }
+  const [bookings, setBookings] = useState({}); // e.g., { "8:00-8:15": "9A", "8:15-8:30": "10A" }
 
   // Check if a room is already booked in any time slot
   const isRoomBooked = (room) => {
@@ -135,9 +174,18 @@ function Fooldal() {
                 <TableCell align="center" sx={{ minWidth: 30 }}>
                   <strong>Terem</strong>
                 </TableCell>
-                {timeSlots.map((time) => (
-                  <TableCell key={time} align="center" sx={{ minWidth: 50 }}>
-                    <strong>{time}</strong>
+                {timeLabels.map((label, index) => (
+                  <TableCell
+                    key={label}
+                    align="center"
+                    colSpan={2} // Each label spans two 15-minute cells
+                    sx={{
+                      minWidth: 60,
+                      fontSize: "0.8rem",
+                      textAlign: "start",
+                    }}
+                  >
+                    <strong>{label}</strong>
                   </TableCell>
                 ))}
               </TableRow>
@@ -148,11 +196,13 @@ function Fooldal() {
                   key={row.id}
                   sx={{
                     "&:not(:last-child)": {
-                      borderBottom: "2px solid #e0e0e0", // Divider between rows
+                      borderBottom: "1px solid #e0e0e0",
                     },
                   }}
                 >
-                  <TableCell align="center">{row.room}</TableCell>
+                  <TableCell align="center" sx={{ fontSize: "0.8rem" }}>
+                    {row.room}
+                  </TableCell>
                   {timeSlots.map((time) => (
                     <TableCell
                       key={`${row.id}-${time}`}
@@ -169,6 +219,8 @@ function Fooldal() {
                           (isRoomBooked(row.room) && row[time] !== "X")
                             ? 0.5
                             : 1,
+                        padding: "4px",
+                        fontSize: "0.8rem",
                       }}
                     >
                       {row[time]}
