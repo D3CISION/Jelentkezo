@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { Box, Typography, Container, Button } from "@mui/material";
+import {
+  Box,
+  Typography,
+  Container,
+  Button,
+  useMediaQuery,
+  useTheme,
+} from "@mui/material";
 import Toastify from "toastify-js";
 import "toastify-js/src/toastify.css";
 
@@ -10,6 +17,10 @@ function Fooldal() {
   const [selectedEventIds, setSelectedEventIds] = useState([]);
   const [user, setUser] = useState(null);
   const [isSubmitted, setIsSubmitted] = useState(false);
+
+  // Detect mobile view
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // Breakpoint at 600px
 
   // Fetch events and get user from localStorage on component mount
   useEffect(() => {
@@ -71,6 +82,7 @@ function Fooldal() {
   };
 
   // Check if an event is selectable (no time overlap, one per room, not full)
+.Concurrent events must be in different rooms
   const isEventSelectable = (event) => {
     // Check if event is full
     if (event.JelentkezokSzama >= 15) {
@@ -271,6 +283,19 @@ function Fooldal() {
   // Total timeline duration (8:00 to 12:00 = 240 minutes)
   const totalDuration = 240;
 
+  // Time slots for mobile view (every 30 minutes from 8:00 to 12:00)
+  const timeSlots = [
+    "8:00",
+    "8:30",
+    "9:00",
+    "9:30",
+    "10:00",
+    "10:30",
+    "11:00",
+    "11:30",
+    "12:00",
+  ];
+
   return (
     <Container maxWidth="lg">
       <Box
@@ -286,209 +311,399 @@ function Fooldal() {
         }}
       >
         <Typography
-          variant="h4"
+          variant={isMobile ? "h5" : "h4"}
           component="h1"
           sx={{
             mb: 4,
             color: (theme) => theme.palette.text.primary || "#000",
+            textAlign: "center",
           }}
         >
           Előadások Ütemterve
         </Typography>
         <Box
           sx={{
-            width: "90vw",
-            maxHeight: "70vh",
+            width: isMobile ? "100vw" : "90vw",
+            maxHeight: isMobile ? "60vh" : "70vh",
             overflowY: "auto",
             bgcolor: "#fff",
             boxShadow: 3,
-            p: 2,
+            p: isMobile ? 1 : 2,
+            overflowX: isMobile ? "auto" : "hidden",
           }}
         >
-          {/* Header Row */}
-          <Box
-            sx={{
-              display: "flex",
-              borderBottom: "1px solid #e0e0e0",
-              position: "sticky",
-              top: 0,
-              bgcolor: "#fff",
-              zIndex: 1,
-            }}
-          >
-            <Box
-              sx={{
-                width: 80,
-                flexShrink: 0,
-                p: 1,
-                fontWeight: "bold",
-                fontSize: "0.8rem",
-                textAlign: "center",
-              }}
-            >
-              Terem
-            </Box>
-            <Box
-              sx={{
-                width: 200,
-                flexShrink: 0,
-                p: 1,
-                fontWeight: "bold",
-                fontSize: "0.8rem",
-                textAlign: "center",
-              }}
-            >
-              Téma
-            </Box>
-            <Box
-              sx={{
-                width: 200,
-                flexShrink: 0,
-                p: 1,
-                fontWeight: "bold",
-                fontSize: "0.8rem",
-                textAlign: "center",
-              }}
-            >
-              Előadó
-            </Box>
-            <Box sx={{ flexGrow: 1, p: 1, position: "relative" }}>
-              {/* Time labels every half-hour, aligned with event starts */}
-              {[
-                "8:00",
-                "8:30",
-                "9:00",
-                "9:30",
-                "10:00",
-                "10:30",
-                "11:00",
-                "11:30",
-                "12:00",
-              ].map((label, index) => (
-                <Typography
-                  key={label}
+          {isMobile ? (
+            // Mobile View: Time slots as rows, rooms as columns
+            <Box>
+              {/* Header Row: Rooms, Tema, Eloado */}
+              <Box
+                sx={{
+                  display: "flex",
+                  flexDirection: "row",
+                  borderBottom: "1px solid #e0e0e0",
+                  position: "sticky",
+                  top: 0,
+                  bgcolor: "#fff",
+                  zIndex: 1,
+                  minWidth: `${eloadastipusok.length * 120 + 60}px`, // Adjust for time column
+                }}
+              >
+                <Box
                   sx={{
-                    position: "absolute",
-                    left: `${((index * 30) / totalDuration) * 100}%`,
-                    fontSize: "0.8rem",
+                    width: 60,
+                    flexShrink: 0,
+                    p: 1,
                     fontWeight: "bold",
+                    fontSize: "0.7rem",
+                    textAlign: "center",
+                    position: "sticky",
+                    left: 0,
+                    bgcolor: "#fff",
+                    zIndex: 2,
                   }}
                 >
-                  {label}
-                </Typography>
-              ))}
-            </Box>
-          </Box>
-          {/* Room Rows */}
-          {eloadastipusok.map((room, index) => (
-            <Box
-              key={room.terem}
-              sx={{
-                display: "flex",
-                borderBottom: "1px solid #e0e0e0",
-                "&:last-child": { borderBottom: "none" },
-              }}
-            >
-              <Box
-                sx={{
-                  width: 80,
-                  flexShrink: 0,
-                  p: 1,
-                  fontSize: "0.8rem",
-                  textAlign: "center",
-                  overflow: "hidden",
-                  textOverflow: "ellipsis",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                {room.terem}
+                  Idő
+                </Box>
+                {eloadastipusok.map((room) => (
+                  <Box
+                    key={room.terem}
+                    sx={{
+                      width: 120,
+                      flexShrink: 0,
+                      p: 1,
+                      textAlign: "center",
+                    }}
+                  >
+                    <Typography sx={{ fontWeight: "bold", fontSize: "0.7rem" }}>
+                      {room.terem}
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.6rem", color: "#555" }}>
+                      {room.tema}
+                    </Typography>
+                    <Typography sx={{ fontSize: "0.6rem", color: "#555" }}>
+                      {room.eloado}
+                    </Typography>
+                  </Box>
+                ))}
               </Box>
-              <Box
-                sx={{
-                  width: 200,
-                  flexShrink: 0,
-                  p: 1,
-                  fontSize: "0.8rem",
-                  textAlign: "center",
-                }}
-              >
-                {room.tema}
-              </Box>
-              <Box
-                sx={{
-                  width: 200,
-                  flexShrink: 0,
-                  p: 1,
-                  fontSize: "0.8rem",
-                  textAlign: "center",
-                }}
-              >
-                {room.eloado}
-              </Box>
-              <Box sx={{ flexGrow: 1, position: "relative", height: 40, p: 1 }}>
-                {/* Event Boxes (empty, selectable) */}
-                {esemenyek
-                  .filter((event) => event.Terem === room.terem)
-                  .map((event, eventIndex) => {
-                    const startMinutes = timeToMinutes(event.Kezd);
-                    const endMinutes = timeToMinutes(event.Veg);
-                    const duration = endMinutes - startMinutes;
-                    const left = (startMinutes / totalDuration) * 100;
-                    const width = (duration / totalDuration) * 100;
-                    const isSelected = selectedEventIds.includes(event.Id);
-                    const isFull = event.JelentkezokSzama >= 15;
-
-                    return (
+              {/* Time Slot Rows */}
+              {timeSlots.map((time, index) => {
+                const slotStartMinutes = index * 30;
+                return (
+                  <Box
+                    key={time}
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      borderBottom: "1px solid #e0e0e0",
+                      "&:last-child": { borderBottom: "none" },
+                      height: 40,
+                      boxSizing: "border-box",
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 60,
+                        flexShrink: 0,
+                        display: "flex",
+                        alignItems: "flex-start",
+                        justifyContent: "center",
+                        fontSize: "0.7rem",
+                        textAlign: "center",
+                        position: "sticky",
+                        left: 0,
+                        bgcolor: "#fff",
+                        zIndex: 100,
+                        p: 0,
+                        pt: "4px", // Slight offset to align with event box top
+                        boxSizing: "border-box",
+                      }}
+                    >
+                      {time}
+                    </Box>
+                    {eloadastipusok.map((room) => (
                       <Box
-                        key={`${room.terem}-${event.Kezd}-${eventIndex}`}
-                        {...(!isFull && {
-                          onClick: () => handleBoxClick(event),
-                        })}
+                        key={`${time}-${room.terem}`}
                         sx={{
-                          position: "absolute",
-                          left: `${left}%`,
-                          width: `${width}%`,
-                          height: "30px",
-                          bgcolor: isFull
-                            ? "#b0bec5"
-                            : isSelected
-                            ? "#4fc3f7"
-                            : "#e0f7fa",
-                          borderRadius: 1,
-                          textAlign: "center",
-                          lineHeight: "30px",
-                          fontSize: "0.8rem",
-                          cursor: isSubmitted || isFull ? "default" : "pointer",
-                          "&:hover": {
-                            bgcolor:
-                              isSubmitted || isFull
-                                ? isFull
-                                  ? "#b0bec5"
-                                  : isSelected
-                                  ? "#4fc3f7"
-                                  : "#e0f7fa"
-                                : isSelected
-                                ? "#29b6f6"
-                                : "#b2ebf2",
-                          },
-                          border: isSelected
-                            ? "2px solid #0288d1"
-                            : "1px solid #b0bec5",
+                          width: 120,
+                          flexShrink: 0,
+                          position: "relative",
+                          height: 40,
+                          p: 0,
+                          boxSizing: "border-box",
                         }}
                       >
-                        {event.JelentkezokSzama + "/15"}
+                        {esemenyek
+                          .filter((event) => event.Terem === room.terem)
+                          .map((event, eventIndex) => {
+                            const eventStartMinutes = timeToMinutes(event.Kezd);
+                            const eventEndMinutes = timeToMinutes(event.Veg);
+                            const slotEndMinutes = slotStartMinutes + 30;
+                            // Check if event overlaps with this time slot
+                            if (
+                              eventStartMinutes < slotEndMinutes &&
+                              eventEndMinutes > slotStartMinutes
+                            ) {
+                              const isSelected = selectedEventIds.includes(
+                                event.Id
+                              );
+                              const isFull = event.JelentkezokSzama >= 15;
+                              // Calculate height and top offset
+                              const eventDuration =
+                                eventEndMinutes - eventStartMinutes;
+                              const height = (eventDuration / 30) * 40; // 40px per 30min slot
+                              // Align top with slot start if event starts in this slot
+                              const topOffset =
+                                eventStartMinutes <= slotStartMinutes
+                                  ? (slotStartMinutes - eventStartMinutes) / 30 * 40
+                                  : -((eventStartMinutes - slotStartMinutes) / 30) * 40;
+                              console.log("Event positioning:", {
+                                eventId: event.Id,
+                                terem: room.terem,
+                                timeSlot: time,
+                                eventStartMinutes,
+                                slotStartMinutes,
+                                topOffset,
+                                height,
+                              });
+                              return (
+                                <Box
+                                  key={`${room.terem}-${event.Kezd}-${eventIndex}`}
+                                  {...(!isFull && {
+                                    onClick: () => handleBoxClick(event),
+                                  })}
+                                  sx={{
+                                    position: "absolute",
+                                    top: `${topOffset}px`,
+                                    left: "5%",
+                                    width: "90%",
+                                    height: `${height}px`,
+                                    bgcolor: isFull
+                                      ? "#b0bec5"
+                                      : isSelected
+                                      ? "#4fc3f7"
+                                      : "#e0f7fa",
+                                    borderRadius: 1,
+                                    textAlign: "center",
+                                    lineHeight: `${height}px`,
+                                    fontSize: "0.6rem",
+                                    cursor:
+                                      isSubmitted || isFull
+                                        ? "default"
+                                        : "pointer",
+                                    "&:hover": {
+                                      bgcolor:
+                                        isSubmitted || isFull
+                                          ? isFull
+                                            ? "#b0bec5"
+                                            : isSelected
+                                            ? "#4fc3f7"
+                                            : "#e0f7fa"
+                                          : isSelected
+                                          ? "#29b6f6"
+                                          : "#b2ebf2",
+                                    },
+                                    border: isSelected
+                                      ? "2px solid #0288d1"
+                                      : "1px solid #b0bec5",
+                                    zIndex: isSelected ? 2 : 1,
+                                    boxSizing: "border-box",
+                                  }}
+                                >
+                                  {event.JelentkezokSzama}/15
+                                </Box>
+                              );
+                            }
+                            return null;
+                          })}
                       </Box>
-                    );
-                  })}
-              </Box>
+                    ))}
+                  </Box>
+                );
+              })}
             </Box>
-          ))}
+          ) : (
+            // Desktop View: Rooms as rows, time as x-axis
+            <Box>
+              {/* Header Row */}
+              <Box
+                sx={{
+                  display: "flex",
+                  borderBottom: "1px solid #e0e0e0",
+                  position: "sticky",
+                  top: 0,
+                  bgcolor: "#fff",
+                  zIndex: 1,
+                }}
+              >
+                <Box
+                  sx={{
+                    width: 80,
+                    flexShrink: 0,
+                    p: 1,
+                    fontWeight: "bold",
+                    fontSize: "0.8rem",
+                    textAlign: "center",
+                  }}
+                >
+                  Terem
+                </Box>
+                <Box
+                  sx={{
+                    width: 200,
+                    flexShrink: 0,
+                    p: 1,
+                    fontWeight: "bold",
+                    fontSize: "0.8rem",
+                    textAlign: "center",
+                  }}
+                >
+                  Téma
+                </Box>
+                <Box
+                  sx={{
+                    width: 200,
+                    flexShrink: 0,
+                    p: 1,
+                    fontWeight: "bold",
+                    fontSize: "0.8rem",
+                    textAlign: "center",
+                  }}
+                >
+                  Előadó
+                </Box>
+                <Box sx={{ flexGrow: 1, p: 1, position: "relative" }}>
+                  {/* Time labels every half-hour, aligned with event starts */}
+                  {timeSlots.map((label, index) => (
+                    <Typography
+                      key={label}
+                      sx={{
+                        position: "absolute",
+                        left: `${((index * 30) / totalDuration) * 100}%`,
+                        fontSize: "0.8rem",
+                        fontWeight: "bold",
+                      }}
+                    >
+                      {label}
+                    </Typography>
+                  ))}
+                </Box>
+              </Box>
+              {/* Room Rows */}
+              {eloadastipusok.map((room, index) => (
+                <Box
+                  key={room.terem}
+                  sx={{
+                    display: "flex",
+                    borderBottom: "1px solid #e0e0e0",
+                    "&:last-child": { borderBottom: "none" },
+                  }}
+                >
+                  <Box
+                    sx={{
+                      width: 80,
+                      flexShrink: 0,
+                      p: 1,
+                      fontSize: "0.8rem",
+                      textAlign: "center",
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {room.terem}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: 200,
+                      flexShrink: 0,
+                      p: 1,
+                      fontSize: "0.8rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {room.tema}
+                  </Box>
+                  <Box
+                    sx={{
+                      width: 200,
+                      flexShrink: 0,
+                      p: 1,
+                      fontSize: "0.8rem",
+                      textAlign: "center",
+                    }}
+                  >
+                    {room.eloado}
+                  </Box>
+                  <Box
+                    sx={{ flexGrow: 1, position: "relative", height: 40, p: 1 }}
+                  >
+                    {/* Event Boxes (empty, selectable) */}
+                    {esemenyek
+                      .filter((event) => event.Terem === room.terem)
+                      .map((event, eventIndex) => {
+                        const startMinutes = timeToMinutes(event.Kezd);
+                        const endMinutes = timeToMinutes(event.Veg);
+                        const duration = endMinutes - startMinutes;
+                        const left = (startMinutes / totalDuration) * 100;
+                        const width = (duration / totalDuration) * 100;
+                        const isSelected = selectedEventIds.includes(event.Id);
+                        const isFull = event.JelentkezokSzama >= 15;
+
+                        return (
+                          <Box
+                            key={`${room.terem}-${event.Kezd}-${eventIndex}`}
+                            {...(!isFull && {
+                              onClick: () => handleBoxClick(event),
+                            })}
+                            sx={{
+                              position: "absolute",
+                              left: `${left}%`,
+                              width: `${width}%`,
+                              height: "30px",
+                              bgcolor: isFull
+                                ? "#b0bec5"
+                                : isSelected
+                                ? "#4fc3f7"
+                                : "#e0f7fa",
+                              borderRadius: 1,
+                              textAlign: "center",
+                              lineHeight: "30px",
+                              fontSize: "0.8rem",
+                              cursor:
+                                isSubmitted || isFull ? "default" : "pointer",
+                              "&:hover": {
+                                bgcolor:
+                                  isSubmitted || isFull
+                                    ? isFull
+                                      ? "#b0bec5"
+                                      : isSelected
+                                      ? "#4fc3f7"
+                                      : "#e0f7fa"
+                                    : isSelected
+                                    ? "#29b6f6"
+                                    : "#b2ebf2",
+                              },
+                              border: isSelected
+                                ? "2px solid #0288d1"
+                                : "1px solid #b0bec5",
+                            }}
+                          >
+                            {event.JelentkezokSzama}/15
+                          </Box>
+                        );
+                      })}
+                  </Box>
+                </Box>
+              ))}
+            </Box>
+          )}
         </Box>
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: 4, mb: isMobile ? 2 : 0 }}>
           <Button
             variant="contained"
             color="primary"
-            sx={{ px: 4, py: 1 }}
+            sx={{ px: 4, py: 1, fontSize: isMobile ? "0.8rem" : "1rem" }}
             onClick={handleSubmit}
             disabled={isSubmitted || !user}
           >
