@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { TextField, Button, Typography, Container, Box } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import Toastify from "toastify-js";
-import "toastify-js/src/toastify.css";
+import { toast } from "react-toastify";
 
 function Bejelentkezes() {
   const [name, setName] = useState("");
@@ -13,45 +12,39 @@ function Bejelentkezes() {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
   const handleSubmit = () => {
+    console.log(email)
     if (!email) {
-      Toastify({
-        text: "Az email cím megadása kötelező!",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f44336", // Red for error
-        stopOnFocus: true,
-      }).showToast();
+      toast.error("Az email cím megadása kötelező!")
       return;
     }
     if (!name) {
-      Toastify({
-        text: "A név megadása kötelező!",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f44336", // Red for error
-        stopOnFocus: true,
-      }).showToast();
+      toast.error("A név megadása kötelező!")
       return;
     }
     if (!emailRegex.test(email)) {
-      Toastify({
-        text: "Nem megfelelő formátumú email cím!",
-        duration: 3000,
-        close: true,
-        gravity: "top",
-        position: "right",
-        backgroundColor: "#f44336", // Red for error
-        stopOnFocus: true,
-      }).showToast();
+      toast.error("Hibás formátumú email cím")
       return;
     }
+    fetch("https://localhost:44344/api/Szemelyek", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        Nev: name,
+        Email: email,
+      }),
+    }).then((response) => {
+      if (!response.ok) {
+        if (response.status == 409) {
+          toast.error("Már jelentkeztél előadásokra.");
+        }
+      } else {
+        navigate("/fooldal");
+      }
+    });
 
     // Navigate to Fooldal if email is valid
-    navigate("/fooldal");
   };
 
   return (

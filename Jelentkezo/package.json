@@ -17,6 +17,7 @@
     "@mui/styles": "^6.4.8",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
+    "react-toastify": "^11.0.5",
     "toastify-js": "^1.12.0"
   },
   "devDependencies": {
