@@ -82,7 +82,7 @@ function Fooldal() {
   };
 
   // Check if an event is selectable (no time overlap, one per room, not full)
-.Concurrent events must be in different rooms
+  //Concurrent events must be in different rooms
   const isEventSelectable = (event) => {
     // Check if event is full
     if (event.JelentkezokSzama >= 15) {
