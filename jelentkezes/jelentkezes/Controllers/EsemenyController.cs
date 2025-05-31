@@ -60,5 +60,19 @@ namespace jelentkezes.Controllers
         public void Delete(int id)
         {
         }
+
+        [Route("api/Esemeny/kezdesiIdopontok")]
+        [HttpGet]
+        public IHttpActionResult getKezdesiIdopontok()
+        {
+            using (var ctx = new JelentkezesContext())
+            {
+                var res = ctx.Esemeny
+                    .Select(x => x.Kezd)
+                    .Distinct()
+                    .ToList();
+                return Ok(res);
+            }
+        }
     }
 }

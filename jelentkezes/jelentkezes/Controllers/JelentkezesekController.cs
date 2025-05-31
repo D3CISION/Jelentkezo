@@ -90,5 +90,19 @@ namespace jelentkezes.Controllers
                 return InternalServerError(e);
             }
         }
+
+        public IHttpActionResult Delete(int id)
+        {
+            using (var ctx = new JelentkezesContext())
+            {
+                var res = ctx.Jelentkezesek.Where(x => x.Id == id).FirstOrDefault();
+                if (res == null)
+                {
+                    return NotFound();
+                }
+                ctx.Jelentkezesek.Remove(res);
+                return Ok();
+            }
+        }
     }
 }
